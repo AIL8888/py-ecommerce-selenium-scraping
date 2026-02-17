@@ -11,6 +11,7 @@ from selenium.common.exceptions import (
     NoSuchElementException,
     StaleElementReferenceException,
     TimeoutException,
+    InvalidSelectorException,
 )
 from selenium.webdriver.common.by import By
 from selenium.webdriver.remote.webelement import WebElement
@@ -72,11 +73,12 @@ def _try_accept_cookies(driver: webdriver.Chrome) -> None:
             )
             button.click()
             return
-        except TimeoutException:
+        except (TimeoutException, InvalidSelectorException):
             continue
         except (
             ElementClickInterceptedException,
             StaleElementReferenceException,
+            InvalidSelectorException,
         ):
             try:
                 driver.execute_script("arguments[0].click();", button)
