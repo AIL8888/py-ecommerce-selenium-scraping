@@ -138,7 +138,7 @@ def _find_more_button(driver: webdriver.Chrome) -> Optional[WebElement]:
             btn = driver.find_element(by, selector)
             if btn.is_displayed() and btn.is_enabled():
                 return btn
-        except NoSuchElementException:
+        except (NoSuchElementException, InvalidSelectorException):
             continue
     return None
 
