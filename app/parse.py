@@ -3,6 +3,7 @@ import re
 import time
 from dataclasses import dataclass
 from urllib.parse import urljoin
+from typing import List, Optional
 
 from selenium import webdriver
 from selenium.common.exceptions import (
@@ -41,7 +42,7 @@ def _create_driver() -> webdriver.Chrome:
     return driver
 
 
-def _scrape_page(driver: webdriver.Chrome, url: str) -> list[Product]:
+def _scrape_page(driver: webdriver.Chrome, url: str) -> List[Product]:
     driver.get(url)
     _try_accept_cookies(driver)
 
@@ -114,7 +115,7 @@ def _click_load_more_until_end(driver: webdriver.Chrome) -> None:
             return
 
 
-def _find_more_button(driver: webdriver.Chrome) -> WebElement | None:
+def _find_more_button(driver: webdriver.Chrome) -> Optional[WebElement]:
     selectors = [
         (By.CSS_SELECTOR, "a.ecomerce-items-scroll-more"),
         (By.CSS_SELECTOR, "button.ecomerce-items-scroll-more"),
@@ -140,7 +141,7 @@ def _find_more_button(driver: webdriver.Chrome) -> WebElement | None:
     return None
 
 
-def _parse_products(driver: webdriver.Chrome) -> list[Product]:
+def _parse_products(driver: webdriver.Chrome) -> List[Product]:
     product_cards = driver.find_elements(
         By.XPATH,
         "//div[contains(@class,'thumbnail') and "
@@ -160,7 +161,7 @@ def _parse_products(driver: webdriver.Chrome) -> list[Product]:
             ".//h4[contains(@class,'price')]]",
         )
 
-    products: list[Product] = []
+    products: List[Product] = []
     for card in product_cards:
         title_el = card.find_element(By.CSS_SELECTOR, "a.title")
         title = title_el.get_attribute("title") or title_el.text
@@ -215,7 +216,7 @@ def _parse_reviews(card: WebElement) -> int:
     return int(match.group(0)) if match else 0
 
 
-def _write_products(page_name: str, products: list[Product]) -> None:
+def _write_products(page_name: str, products: List[Product]) -> None:
     with open(f"{page_name}.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(
